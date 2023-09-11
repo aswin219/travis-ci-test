@@ -1,0 +1,50 @@
+language: python
+python:
+  - 3.8
+
+services:
+  - docker
+
+# env:
+#   global:
+#     - AWS_REGION=your-aws-region
+#     - AWS_ACCESS_KEY_ID=your-access-key-id
+#     - AWS_SECRET_ACCESS_KEY=your-secret-access-key
+#     - CLUSTER_NAME=your-eks-cluster-name
+
+before_install:
+  # Installing kubectl
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - chmod +x kubectl
+  - sudo mv kubectl /usr/local/bin/
+  
+  # Install and configure AWS CLI
+  - pip install awscli
+  - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+  - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+  - aws configure set default.region ${AWS_REGION}
+
+  # Install eksctl
+  - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64" > eksctl
+  - chmod +x eksctl
+  - sudo mv eksctl /usr/local/bin/
+
+install:
+  # Installing dependencies
+  - pip install -r requirements.txt
+
+script:
+  # Runing Tests
+  
+after_success:
+  # Build and push image to ECR
+
+  - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}
+  - docker build -t ${AWS_ACCOUNT}/${AWS_ECR}:${TAG} .
+  - docker push ${AWS_ACCOUNT}/${AWS_ECR}:${TAG}
+
+# deploy:
+#   provider: script
+#   script: ./deploy.sh
+#   on:
+#     branch: main
