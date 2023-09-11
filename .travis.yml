@@ -35,6 +35,7 @@ install:
 
 script:
   # Runing Tests
+  - echo "No Test to run"
   
 after_success:
   # Build and push image to ECR
