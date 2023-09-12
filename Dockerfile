@@ -1,9 +1,7 @@
-FROM python:3.8-slim
+FROM node:14
 
-RUN mkdir app
 WORKDIR /app
 COPY . .
-RUN python -m pip install --upgrade pip
-RUN pip install -r requirements.txt
-EXPOSE 5000
-CMD ["python3", "app.py"]
+RUN npm install
+EXPOSE 3000
+CMD ["node", "index.js"]
